@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace OddsComparison;
 
+use OddsComparison\Admin\AdminModule;
 use OddsComparison\Bookmakers\BookmakerRepository;
 use OddsComparison\Cache\TransientCache;
 use OddsComparison\Contracts\CacheInterface;
@@ -18,6 +19,7 @@ use OddsComparison\Database\Schema;
 use OddsComparison\Http\CircuitBreaker;
 use OddsComparison\Http\Fetcher;
 use OddsComparison\Odds\Converter;
+use OddsComparison\Rest\AdminController;
 use OddsComparison\Service\OddsService;
 use OddsComparison\Settings\Settings;
 use OddsComparison\Sources\BestOddsSource;
@@ -162,8 +164,14 @@ final class Plugin
      */
     private function defaultModules(): array
     {
-        // Modules register themselves here as the plugin grows.
-        return [];
+        // REST requests are not is_admin(), so the controller is always registered.
+        $modules = [AdminController::class];
+
+        if (is_admin()) {
+            $modules[] = AdminModule::class;
+        }
+
+        return $modules;
     }
 
     /**
