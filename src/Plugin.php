@@ -20,6 +20,8 @@ use OddsComparison\Http\CircuitBreaker;
 use OddsComparison\Http\Fetcher;
 use OddsComparison\Odds\Converter;
 use OddsComparison\Rest\AdminController;
+use OddsComparison\Rest\OddsController;
+use OddsComparison\Service\OddsPresenter;
 use OddsComparison\Service\OddsService;
 use OddsComparison\Settings\Settings;
 use OddsComparison\Sources\BestOddsSource;
@@ -52,6 +54,7 @@ final class Plugin
     private ?BookmakerRepository $bookmakers = null;
     private ?Converter $converter = null;
     private ?OddsService $service = null;
+    private ?OddsPresenter $presenter = null;
     private ?OddsStore $store = null;
 
     private function __construct()
@@ -139,6 +142,10 @@ final class Plugin
     }
 
 
+    public function presenter(): OddsPresenter
+    {
+        return $this->presenter ??= new OddsPresenter($this->converter(), $this->bookmakers());
+    }
 
     public function odds(): OddsService
     {
@@ -164,8 +171,8 @@ final class Plugin
      */
     private function defaultModules(): array
     {
-        // REST requests are not is_admin(), so the controller is always registered.
-        $modules = [AdminController::class];
+        // REST requests are not is_admin(), so the controllers are always registered.
+        $modules = [AdminController::class, OddsController::class];
 
         if (is_admin()) {
             $modules[] = AdminModule::class;
