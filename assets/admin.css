@@ -1,0 +1,71 @@
+.oddscmp-panel {
+    max-width: 1100px;
+    margin-top: 16px;
+}
+
+.oddscmp-sources td,
+.oddscmp-bookmakers td {
+    vertical-align: middle;
+}
+
+.oddscmp-sources .description {
+    margin: 2px 0 0;
+}
+
+.oddscmp-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.8;
+    background: #f0f0f1;
+    color: #3c434a;
+}
+
+.oddscmp-badge--available {
+    background: #edfaef;
+    border-color: #00a32a;
+    color: #005c12;
+}
+
+.oddscmp-badge--blocked {
+    background: #fcf0f1;
+    border-color: #d63638;
+    color: #8a2424;
+}
+
+.oddscmp-badge--unreachable,
+.oddscmp-badge--parser_mismatch {
+    background: #fcf9e8;
+    border-color: #dba617;
+    color: #614200;
+}
+
+.oddscmp-badge--needs_key {
+    background: #f0f6fc;
+    border-color: #2271b1;
+    color: #0a4b78;
+}
+
+.oddscmp-group {
+    margin-bottom: 24px;
+}
+
+.oddscmp-group h2 {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.oddscmp-count {
+    font-size: 13px;
+    font-weight: 400;
+    color: #50575e;
+}
+
+.oddscmp-status {
+    margin-left: 8px;
+    color: #50575e;
+}
