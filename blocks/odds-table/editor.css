@@ -1,0 +1,26 @@
+/* Editor-only styles. */
+.oddscmp-editor__picker {
+	display: grid;
+	gap: 12px;
+	width: 100%;
+	max-width: 420px;
+}
+
+.oddscmp-editor__hint {
+	color: #757575;
+	font-size: 12px;
+}
+
+.oddscmp-editor__list {
+	margin: 0 0 12px;
+	padding: 0;
+	list-style: none;
+}
+
+.oddscmp-editor__list li {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 4px 0;
+	border-bottom: 1px solid #e0e0e0;
+}
