@@ -1,0 +1,220 @@
+/* Odds table: front end and editor. Colours follow the theme through currentColor. */
+.oddscmp {
+	--oddscmp-border: color-mix(in srgb, currentColor 16%, transparent);
+	--oddscmp-muted: color-mix(in srgb, currentColor 62%, transparent);
+	--oddscmp-stripe: color-mix(in srgb, currentColor 4%, transparent);
+	--oddscmp-best-bg: #e7f6ec;
+	--oddscmp-best-fg: #0b5b2a;
+	--oddscmp-accent: #1d4ed8;
+
+	margin-block: 1.5em;
+	font-size: 0.95rem;
+}
+
+@media (prefers-color-scheme: dark) {
+	.oddscmp {
+		--oddscmp-best-bg: #10351f;
+		--oddscmp-best-fg: #7be0a1;
+		--oddscmp-accent: #7aa2ff;
+	}
+}
+
+.oddscmp__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 0.25rem 1rem;
+	margin-bottom: 0.75rem;
+}
+
+.oddscmp__event {
+	font-size: 1.15em;
+	font-weight: 700;
+	line-height: 1.3;
+}
+
+.oddscmp__market,
+.oddscmp__updated {
+	color: var(--oddscmp-muted);
+	font-size: 0.85em;
+}
+
+.oddscmp__switch {
+	display: inline-flex;
+	margin-bottom: 0.75rem;
+	border: 1px solid var(--oddscmp-border);
+	border-radius: 999px;
+	padding: 2px;
+}
+
+.oddscmp__switch-btn {
+	appearance: none;
+	border: 0;
+	border-radius: 999px;
+	padding: 0.3rem 0.85rem;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	font-size: 0.85em;
+	cursor: pointer;
+}
+
+.oddscmp__switch-btn[aria-pressed="true"] {
+	background: var(--oddscmp-accent);
+	color: #fff;
+}
+
+.oddscmp__switch-btn:focus-visible,
+.oddscmp__scroll:focus-visible,
+.oddscmp__bet:focus-visible,
+.oddscmp__price a:focus-visible {
+	outline: 2px solid var(--oddscmp-accent);
+	outline-offset: 2px;
+}
+
+.oddscmp__scroll {
+	overflow-x: auto;
+	border: 1px solid var(--oddscmp-border);
+	border-radius: 8px;
+}
+
+.oddscmp__table {
+	width: 100%;
+	min-width: max-content;
+	border-collapse: collapse;
+	font-variant-numeric: tabular-nums;
+}
+
+.oddscmp__table th,
+.oddscmp__table td {
+	padding: 0.6rem 0.85rem;
+	border-bottom: 1px solid var(--oddscmp-border);
+	text-align: center;
+	white-space: nowrap;
+}
+
+.oddscmp__table tbody tr:nth-child(even) {
+	background: var(--oddscmp-stripe);
+}
+
+.oddscmp__table tr:last-child > * {
+	border-bottom: 0;
+}
+
+.oddscmp__table thead th {
+	font-size: 0.8em;
+	font-weight: 600;
+}
+
+/* The outcome column stays visible while the bookmakers scroll sideways. */
+.oddscmp__corner,
+.oddscmp__outcome {
+	position: sticky;
+	left: 0;
+	z-index: 1;
+	min-width: 8rem;
+	background: var(--wp--preset--color--base, Canvas);
+	text-align: left !important;
+	font-weight: 600;
+}
+
+.oddscmp__corner {
+	color: var(--oddscmp-muted);
+	font-weight: 500;
+}
+
+.oddscmp__price a,
+.oddscmp__price span {
+	display: block;
+	color: inherit;
+	text-decoration: none;
+}
+
+.oddscmp__price a:hover {
+	text-decoration: underline;
+}
+
+.oddscmp__price.is-empty {
+	color: var(--oddscmp-muted);
+}
+
+.oddscmp__price.is-best {
+	background: var(--oddscmp-best-bg);
+	color: var(--oddscmp-best-fg);
+	font-weight: 700;
+}
+
+.oddscmp__cta {
+	padding-block: 0.5rem;
+}
+
+.oddscmp__bet {
+	display: inline-block;
+	padding: 0.3rem 0.9rem;
+	border-radius: 6px;
+	background: var(--oddscmp-accent);
+	color: #fff;
+	font-size: 0.85em;
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.oddscmp__bet:hover {
+	filter: brightness(1.1);
+}
+
+.oddscmp__status {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	padding: 1.25rem 0.5rem;
+	color: var(--oddscmp-muted);
+}
+
+.oddscmp__spinner {
+	width: 1.1em;
+	height: 1.1em;
+	border: 2px solid var(--oddscmp-border);
+	border-top-color: var(--oddscmp-accent);
+	border-radius: 50%;
+	animation: oddscmp-spin 0.8s linear infinite;
+}
+
+@keyframes oddscmp-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.oddscmp__spinner {
+		animation-duration: 3s;
+	}
+}
+
+.oddscmp__notice {
+	margin: 0 0 0.75rem;
+	padding: 0.6rem 0.85rem;
+	border-left: 4px solid var(--oddscmp-border);
+	border-radius: 4px;
+	background: var(--oddscmp-stripe);
+	font-size: 0.9em;
+}
+
+.oddscmp__notice--warn {
+	border-left-color: #dba617;
+}
+
+.oddscmp__notice--info {
+	border-left-color: var(--oddscmp-accent);
+}
+
+.oddscmp .screen-reader-text {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}

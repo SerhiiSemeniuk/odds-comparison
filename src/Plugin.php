@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace OddsComparison;
 
 use OddsComparison\Admin\AdminModule;
+use OddsComparison\Block\BlockModule;
+use OddsComparison\Block\ConfigSigner;
 use OddsComparison\Bookmakers\BookmakerRepository;
 use OddsComparison\Cache\TransientCache;
 use OddsComparison\Contracts\CacheInterface;
@@ -21,6 +23,7 @@ use OddsComparison\Http\Fetcher;
 use OddsComparison\Odds\Converter;
 use OddsComparison\Rest\AdminController;
 use OddsComparison\Rest\OddsController;
+use OddsComparison\Rest\TableController;
 use OddsComparison\Service\OddsPresenter;
 use OddsComparison\Service\OddsService;
 use OddsComparison\Settings\Settings;
@@ -55,6 +58,7 @@ final class Plugin
     private ?Converter $converter = null;
     private ?OddsService $service = null;
     private ?OddsPresenter $presenter = null;
+    private ?ConfigSigner $signer = null;
     private ?OddsStore $store = null;
 
     private function __construct()
@@ -141,6 +145,10 @@ final class Plugin
         return $this->converter ??= new Converter();
     }
 
+    public function signer(): ConfigSigner
+    {
+        return $this->signer ??= new ConfigSigner();
+    }
 
     public function presenter(): OddsPresenter
     {
@@ -172,7 +180,7 @@ final class Plugin
     private function defaultModules(): array
     {
         // REST requests are not is_admin(), so the controllers are always registered.
-        $modules = [AdminController::class, OddsController::class];
+        $modules = [AdminController::class, OddsController::class, TableController::class, BlockModule::class];
 
         if (is_admin()) {
             $modules[] = AdminModule::class;
