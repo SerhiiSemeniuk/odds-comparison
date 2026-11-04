@@ -22,12 +22,12 @@ defined('ABSPATH') || exit;
 
     <fieldset>
         <legend class="screen-reader-text"><?php esc_html_e('Enabled markets', 'odds-comparison'); ?></legend>
-        <?php foreach ($markets as $id => $label) : ?>
+        <?php foreach ($markets as $marketId => $label) : ?>
             <p>
                 <label>
-                    <input type="checkbox" name="markets[]" value="<?php echo esc_attr($id); ?>" <?php checked(in_array($id, $enabled, true)); ?>>
+                    <input type="checkbox" name="markets[]" value="<?php echo esc_attr($marketId); ?>" <?php checked(in_array($marketId, $enabled, true)); ?>>
                     <?php echo esc_html($label); ?>
-                    <code><?php echo esc_html($id); ?></code>
+                    <code><?php echo esc_html($marketId); ?></code>
                 </label>
             </p>
         <?php endforeach; ?>

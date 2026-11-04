@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace OddsComparison\Settings;
 
+use OddsComparison\Sources\ApiSource;
+
 /**
  * Typed access to the plugin's single settings option.
  *
@@ -35,6 +37,9 @@ final class Settings
             'markets'     => array_keys($this->markets()),
             'link_rel'    => 'sponsored nofollow noopener',
             'link_target' => '_blank',
+            // The Odds API: key and the bookmaker regions to request (each region costs credits).
+            'api_key'     => '',
+            'api_regions' => ['eu'],
         ];
     }
 
@@ -95,6 +100,21 @@ final class Settings
         return (int) $this->get('ttl');
     }
 
+    public function apiKey(): string
+    {
+        return (string) $this->get('api_key');
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function apiRegions(): array
+    {
+        $regions = array_values(array_intersect(array_map('strval', (array) $this->get('api_regions')), array_keys(ApiSource::REGIONS)));
+
+        return $regions !== [] ? $regions : ['eu'];
+    }
+
     public function format(): string
     {
         return (string) $this->get('format');
@@ -137,6 +157,19 @@ final class Settings
 
         $target = (string) ($input['link_target'] ?? $current['link_target']);
 
+        // The key is write-only: it is never printed back, so an empty field keeps the saved key.
+        $apiKey = (string) $current['api_key'];
+        if (!empty($input['api_key_remove'])) {
+            $apiKey = '';
+        } elseif (trim((string) ($input['api_key'] ?? '')) !== '') {
+            $apiKey = (string) preg_replace('/[^A-Za-z0-9]/', '', (string) $input['api_key']);
+        }
+
+        $regions = array_values(array_intersect(
+            array_map('strval', (array) ($input['api_regions'] ?? $current['api_regions'])),
+            array_keys(ApiSource::REGIONS)
+        ));
+
         $clean = [
             'source'      => $source,
             'fallback'    => array_values(array_unique($fallback)),
@@ -145,6 +178,9 @@ final class Settings
             'markets'     => $markets,
             'link_rel'    => sanitize_text_field((string) ($input['link_rel'] ?? $current['link_rel'])),
             'link_target' => in_array($target, ['_blank', '_self'], true) ? $target : '_blank',
+            'api_key'     => $apiKey,
+            // At least one region is needed for the API to return any bookmaker.
+            'api_regions' => $regions !== [] ? $regions : ['eu'],
         ];
 
         update_option(self::OPTION, $clean, false);

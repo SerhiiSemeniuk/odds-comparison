@@ -1,0 +1,32 @@
+{
+  "name": "sesese/odds-comparison",
+  "description": "Compare live odds from many bookmakers with a Gutenberg block.",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=8.1"
+  },
+  "require-dev": {
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+    "phpunit/phpunit": "^10.5 || ^11.5",
+    "wp-coding-standards/wpcs": "^3.1",
+    "wp-phpunit/wp-phpunit": "^6.5 || ^7.0",
+    "yoast/phpunit-polyfills": "^3.0 || ^4.0"
+  },
+  "scripts": {
+    "test": "phpunit",
+    "test:integration": "phpunit -c phpunit-integration.xml.dist",
+    "test:all": [
+      "@test",
+      "@test:integration"
+    ],
+    "lint": "phpcs",
+    "lint:fix": "phpcbf"
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  }
+}

@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OddsComparison\Sources;
 
 use OddsComparison\Contracts\CacheInterface;
+use OddsComparison\Contracts\KeyedSourceInterface;
 
 /**
  * Runs availability checks and remembers the latest result of every source,
@@ -42,7 +43,8 @@ final class HealthMonitor
     {
         $source = $this->registry->get($sourceId);
 
-        $status = $source->requiresApiKey() && !$this->hasKey($sourceId)
+        $keyed  = $source instanceof KeyedSourceInterface ? $source->hasKey() : $this->hasKey($sourceId);
+        $status = $source->requiresApiKey() && !$keyed
             ? new HealthStatus(HealthState::NeedsKey, __('Add an API key in the settings.', 'odds-comparison'), null, time())
             : $source->checkAvailability();
 

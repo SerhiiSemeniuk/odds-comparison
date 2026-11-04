@@ -22,6 +22,8 @@ final class OddsSnapshot
      * @param string        $sourceId  Id of the source that produced the data.
      * @param list<Outcome> $outcomes  Outcomes with per-bookmaker prices.
      * @param int           $fetchedAt Unix timestamp of the fetch.
+     * @param array<string,string> $names Display names the source reported, by bookmaker id.
+     * @param array<string,string> $links Deep links to the bet the source reported, by bookmaker id.
      */
     public function __construct(
         public readonly string $eventId,
@@ -29,6 +31,8 @@ final class OddsSnapshot
         public readonly string $sourceId,
         public readonly array $outcomes,
         public readonly int $fetchedAt,
+        public readonly array $names = [],
+        public readonly array $links = [],
     ) {
     }
 
@@ -58,6 +62,8 @@ final class OddsSnapshot
             'sourceId'  => $this->sourceId,
             'outcomes'  => array_map(static fn (Outcome $o): array => $o->toArray(), $this->outcomes),
             'fetchedAt' => $this->fetchedAt,
+            'names'     => $this->names,
+            'links'     => $this->links,
         ];
     }
 
@@ -75,6 +81,8 @@ final class OddsSnapshot
                 (array) ($data['outcomes'] ?? [])
             ),
             (int) ($data['fetchedAt'] ?? 0),
+            array_map('strval', (array) ($data['names'] ?? [])),
+            array_map('strval', (array) ($data['links'] ?? [])),
         );
     }
 }

@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace OddsComparison\Storage;
 
+use OddsComparison\Contracts\OddsStoreInterface;
 use OddsComparison\Database\Schema;
 
 /**
@@ -20,7 +21,7 @@ use OddsComparison\Database\Schema;
  * Old rows are purged opportunistically: at most once an hour a write also
  * deletes snapshots of events that ended long ago, so no cron job is needed.
  */
-final class OddsStore
+final class OddsStore implements OddsStoreInterface
 {
     private const PURGE_TRANSIENT = 'oddscmp_purge';
 
@@ -66,13 +67,15 @@ final class OddsStore
         $table = Schema::odds();
         $now   = time();
 
-        // One atomic upsert on the (source, event, market) unique key.
+        // One atomic upsert on the (source, event, market) unique key. The table name comes from
+        // Schema (the site's prefix plus a constant); every value goes through a placeholder.
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $wpdb->query(
             $wpdb->prepare(
                 "INSERT INTO {$table} (source_id, event_id, market_id, payload, fetched_at, fresh_until, starts_at)
                  VALUES (%s, %s, %s, %s, %d, %d, NULLIF(%d, 0))
                  ON DUPLICATE KEY UPDATE payload = VALUES(payload), fetched_at = VALUES(fetched_at),
-                    fresh_until = VALUES(fresh_until), starts_at = VALUES(starts_at)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                    fresh_until = VALUES(fresh_until), starts_at = VALUES(starts_at)",
                 $this->cut($sourceId, 32),
                 $this->cut($eventId, 120),
                 $this->cut($marketId, 32),
@@ -82,6 +85,7 @@ final class OddsStore
                 max(0, $startsAt ?? 0) // NULLIF turns an unknown start (0) into NULL.
             )
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
         $this->maybePurge();
     }

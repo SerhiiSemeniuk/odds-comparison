@@ -10,8 +10,9 @@ declare(strict_types=1);
 namespace OddsComparison\Service;
 
 use InvalidArgumentException;
-use OddsComparison\Bookmakers\BookmakerRepository;
+use OddsComparison\Contracts\BookmakerRepositoryInterface;
 use OddsComparison\Contracts\CacheInterface;
+use OddsComparison\Contracts\OddsStoreInterface;
 use OddsComparison\Contracts\SourceInterface;
 use OddsComparison\Settings\Settings;
 use OddsComparison\Sources\Exception\SourceException;
@@ -21,7 +22,6 @@ use OddsComparison\Sources\Model\Market;
 use OddsComparison\Sources\Model\OddsSnapshot;
 use OddsComparison\Sources\Model\Sport;
 use OddsComparison\Sources\SourceRegistry;
-use OddsComparison\Storage\OddsStore;
 
 /**
  * The single entry point the REST API and the block use to read data.
@@ -57,8 +57,8 @@ final class OddsService
         private readonly CacheInterface $cache,
         private readonly Settings $settings,
         private readonly HealthMonitor $health,
-        private readonly BookmakerRepository $bookmakers,
-        private readonly OddsStore $store,
+        private readonly BookmakerRepositoryInterface $bookmakers,
+        private readonly OddsStoreInterface $store,
     ) {
     }
 
@@ -341,7 +341,7 @@ final class OddsService
     private function fetchOdds(Event $event, string $marketId, string $sourceId): array
     {
         $snapshot = $this->source($sourceId)->odds($event, $marketId);
-        $this->bookmakers->discover($sourceId, $snapshot->bookmakerIds());
+        $this->bookmakers->discover($sourceId, $snapshot->bookmakerIds(), $snapshot->names);
 
         return $snapshot->toArray();
     }

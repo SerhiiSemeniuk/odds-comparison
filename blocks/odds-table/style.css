@@ -1,22 +1,21 @@
-/* Odds table: front end and editor. Colours follow the theme through currentColor. */
+/*
+ * Odds table: front end and editor.
+ *
+ * Text, borders and stripes derive from currentColor, so the table follows the site's own
+ * theme (light or dark), never the visitor's OS setting, which can disagree with the site.
+ * Change the accent (buttons, active format) with --oddscmp-accent, e.g.
+ * .oddscmp { --oddscmp-accent: var(--wp--preset--color--primary); }
+ */
 .oddscmp {
 	--oddscmp-border: color-mix(in srgb, currentColor 16%, transparent);
 	--oddscmp-muted: color-mix(in srgb, currentColor 62%, transparent);
 	--oddscmp-stripe: color-mix(in srgb, currentColor 4%, transparent);
-	--oddscmp-best-bg: #e7f6ec;
-	--oddscmp-best-fg: #0b5b2a;
+	--oddscmp-best: #16a34a;
+	--oddscmp-best-bg: color-mix(in srgb, var(--oddscmp-best) 22%, transparent);
 	--oddscmp-accent: #1d4ed8;
 
 	margin-block: 1.5em;
 	font-size: 0.95rem;
-}
-
-@media (prefers-color-scheme: dark) {
-	.oddscmp {
-		--oddscmp-best-bg: #10351f;
-		--oddscmp-best-fg: #7be0a1;
-		--oddscmp-accent: #7aa2ff;
-	}
 }
 
 .oddscmp__head {
@@ -139,9 +138,10 @@
 	color: var(--oddscmp-muted);
 }
 
+/* The best price is marked by a tint, bold text and a bar, so colour is not the only cue. */
 .oddscmp__price.is-best {
 	background: var(--oddscmp-best-bg);
-	color: var(--oddscmp-best-fg);
+	box-shadow: inset 0 -3px 0 var(--oddscmp-best);
 	font-weight: 700;
 }
 

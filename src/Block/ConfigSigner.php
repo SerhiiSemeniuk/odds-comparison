@@ -25,7 +25,8 @@ final class ConfigSigner
      */
     public function sign(array $config): array
     {
-        $token = rtrim(strtr(base64_encode((string) wp_json_encode($config)), '+/', '-_'), '=');
+        // base64url makes the JSON safe for a query string; it is not obfuscation.
+        $token = rtrim(strtr(base64_encode((string) wp_json_encode($config)), '+/', '-_'), '='); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 
         return ['token' => $token, 'sig' => $this->signature($token)];
     }
@@ -39,7 +40,7 @@ final class ConfigSigner
             return null;
         }
 
-        $json   = base64_decode(strtr($token, '-_', '+/'), true);
+        $json   = base64_decode(strtr($token, '-_', '+/'), true); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
         $config = $json !== false ? json_decode($json, true) : null;
 
         return is_array($config) ? $config : null;

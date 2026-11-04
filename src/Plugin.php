@@ -27,6 +27,7 @@ use OddsComparison\Rest\TableController;
 use OddsComparison\Service\OddsPresenter;
 use OddsComparison\Service\OddsService;
 use OddsComparison\Settings\Settings;
+use OddsComparison\Sources\ApiSource;
 use OddsComparison\Sources\BestOddsSource;
 use OddsComparison\Sources\BetExplorerSource;
 use OddsComparison\Sources\HealthMonitor;
@@ -127,6 +128,7 @@ final class Plugin
         return $this->registry ??= new SourceRegistry([
             BestOddsSource::ID    => fn () => new BestOddsSource($this->http()),
             BetExplorerSource::ID => fn () => new BetExplorerSource($this->http()),
+            ApiSource::ID         => fn () => new ApiSource($this->http(), $this->settings()->apiKey(), $this->settings()->apiRegions()),
         ]);
     }
 

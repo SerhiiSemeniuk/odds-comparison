@@ -15,13 +15,13 @@ require_once __DIR__ . '/src/autoload.php';
 \OddsComparison\Database\Schema::drop();
 
 // Options stored by the plugin.
-$options = [
+$oddscmp_options = [
     'odds_comparison_settings', // Settings::OPTION
     'odds_comparison_cache_ns', // OddsService transient namespace
 ];
 
-foreach ($options as $option) {
-    delete_option($option);
+foreach ($oddscmp_options as $oddscmp_option) {
+    delete_option($oddscmp_option);
 }
 
 // Short-lived values (lists, locks, source status) live in transients prefixed "oddscmp_"
@@ -29,11 +29,11 @@ foreach ($options as $option) {
 // and simply expire.
 global $wpdb;
 
-foreach (['_transient_', '_transient_timeout_'] as $prefix) {
+foreach (['_transient_', '_transient_timeout_'] as $oddscmp_prefix) {
     $wpdb->query(
         $wpdb->prepare(
             "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
-            $wpdb->esc_like($prefix . 'oddscmp_') . '%'
+            $wpdb->esc_like($oddscmp_prefix . 'oddscmp_') . '%'
         )
     );
 }

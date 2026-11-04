@@ -1,0 +1,12 @@
+{
+  "id": "ev9nba", "sport_key": "basketball_nba", "sport_title": "NBA", "commence_time": "2026-11-05T00:30:00Z",
+  "home_team": "Charlotte Hornets", "away_team": "Detroit Pistons",
+  "bookmakers": [
+    {"key": "draftkings", "title": "DraftKings", "markets": [{"key": "totals", "outcomes": [
+      {"name": "Over", "price": 1.91, "point": 210.5}, {"name": "Under", "price": 1.91, "point": 210.5}]}]},
+    {"key": "fanduel", "title": "FanDuel", "markets": [{"key": "totals", "outcomes": [
+      {"name": "Over", "price": 1.9, "point": 210.5}, {"name": "Under", "price": 1.92, "point": 210.5}]}]},
+    {"key": "betmgm", "title": "BetMGM", "markets": [{"key": "totals", "outcomes": [
+      {"name": "Over", "price": 1.85, "point": 211.5}, {"name": "Under", "price": 1.97, "point": 211.5}]}]}
+  ]
+}
