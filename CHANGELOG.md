@@ -5,6 +5,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Added
+- The Odds API source: a licensed odds feed with football and many other sports, per-bookmaker prices, bookmaker names and optional deep links. API key (write-only) and bookmaker regions are set in the dashboard; the dashboard shows the credits left after a check.
+- `KeyedSourceInterface` and `AuthenticationException` for sources that need credentials.
+- Bookmaker names and deep links can be reported by a source (`OddsSnapshot`); a deep link is used for the "Bet" button unless the admin set their own link.
+- 179 unit tests with fakes and structural fixtures, and 81 integration tests that boot a real WordPress (REST permissions, database classes, the block end to end, the dashboard). `composer test`, `composer test:integration`, `composer test:all`.
+- WordPress Coding Standards (`composer lint`, `phpcs.xml.dist`): security, escaping, SQL, i18n, deprecated APIs and prefix rules, enforced and clean.
+- Screenshots of the block and the dashboard in the README.
+
+### Changed
+- `OddsService` and `OddsPresenter` depend on `OddsStoreInterface` and `BookmakerRepositoryInterface`, so they can be tested without a database.
+- The odds table follows the site's own colours instead of the visitor's OS dark-mode setting, which made light sites show dark cells; the best price is also marked with a bar so colour is not the only cue.
+- Variables in `uninstall.php` and the admin templates no longer clash with WordPress globals; the placeholder help text on the Bookmakers tab is escaped.
+
 ## [1.0.0]
 
 ### Added
