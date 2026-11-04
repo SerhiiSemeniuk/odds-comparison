@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-04
+
 ### Added
 - The Odds API source: a licensed odds feed with football and many other sports, per-bookmaker prices, bookmaker names and optional deep links. API key (write-only) and bookmaker regions are set in the dashboard; the dashboard shows the credits left after a check.
 - `KeyedSourceInterface` and `AuthenticationException` for sources that need credentials.
