@@ -20,6 +20,7 @@ final class Bookmaker
      * @param string $url     Outbound (affiliate) link; empty means no link.
      * @param bool   $enabled Whether it is shown in comparisons.
      * @param int    $order   Sort position, lowest first.
+     * @param bool   $urlIsCustom Whether the admin set the link (it then beats a source's deep link).
      */
     public function __construct(
         public readonly string $id,
@@ -27,6 +28,7 @@ final class Bookmaker
         public readonly string $url = '',
         public readonly bool $enabled = true,
         public readonly int $order = 0,
+        public readonly bool $urlIsCustom = false,
     ) {
     }
 

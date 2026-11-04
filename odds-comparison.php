@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Odds Comparison
  * Description:       Compare live odds from multiple bookmakers with an admin dashboard, a Gutenberg block and fractional / decimal / American odds conversion.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Requires at least: 6.5
  * Requires PHP:      8.1
  * Author:            SeSeSe
@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 defined('ABSPATH') || exit;
 
-define('ODDSCMP_VERSION', '1.0.0');
+define('ODDSCMP_VERSION', '1.1.0');
 define('ODDSCMP_FILE', __FILE__);
 define('ODDSCMP_DIR', plugin_dir_path(__FILE__));
 define('ODDSCMP_URL', plugin_dir_url(__FILE__));

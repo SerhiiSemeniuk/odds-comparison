@@ -1,6 +1,6 @@
 {
   "name": "odds-comparison",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Gutenberg block for the Odds Comparison plugin.",
   "license": "GPL-2.0-or-later",

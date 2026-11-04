@@ -58,10 +58,27 @@ Rules a source should follow:
 - Return decimal prices (> 1.0). Use the same market ids across sources where it makes sense (`moneyline`, `spread`, `total`, `1x2`).
 
 Once registered, the source appears in the dashboard with its own status and
-check button, and its bookmakers are discovered from its data. If it needs an
-API key, return `true` from `requiresApiKey()` and enable it through the
-`odds_comparison_source_has_key` filter so the dashboard stops showing
-*Needs API key*.
+check button, and its bookmakers are discovered from its data.
+
+### Sources that need an API key
+
+Implement `KeyedSourceInterface` (it adds `hasKey(): bool` to
+`SourceInterface`) and return `true` from `requiresApiKey()`. The dashboard then
+shows *Needs API key* until `hasKey()` is true, without making any request.
+When the service rejects the key, throw `AuthenticationException`; the
+dashboard shows the same status with your message. `ApiSource` is a complete
+example, including how to keep the key out of error messages (it travels in the
+query string there). Build your source in the registry factory from
+`Plugin::instance()->settings()`, so a newly saved key is used on the next request.
+A source that does not implement the interface can still use the
+`odds_comparison_source_has_key` filter.
+
+### Names and deep links
+
+`OddsSnapshot` takes two optional maps keyed by bookmaker id: `names` (display
+names, used for bookmakers the plugin has no name for) and `links` (deep links
+to the bet). A deep link is shown on the "Bet" button unless the admin set their
+own link for that bookmaker.
 
 ### Route requests through a proxy or renderer
 

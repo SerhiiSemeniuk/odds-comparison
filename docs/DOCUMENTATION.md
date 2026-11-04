@@ -27,8 +27,9 @@ odds-comparison.php        bootstrap, constants, activation hooks
 uninstall.php              removes tables, options, transients
 src/
   Plugin.php               singleton kernel and service locator
-  Contracts/               interfaces (Source, HttpClient, Cache, Formatter, Hookable)
-  Sources/                 scrapers, models, health checks, registry
+  Contracts/               interfaces (Source, KeyedSource, HttpClient, Cache, OddsStore,
+                           BookmakerRepository, Formatter, Hookable)
+  Sources/                 BestOdds, BetExplorer and Odds API sources, models, health checks, registry
   Http/                    Fetcher (polite HTTP), RobotsTxt, CircuitBreaker
   Cache/                   TransientCache, ArrayCache
   Database/ Storage/       Schema (tables), OddsStore (odds snapshots)
@@ -43,6 +44,11 @@ src/
 blocks/odds-table/         block source (edit, view, shared renderer, CSS)
 build/                     compiled block (committed)
 assets/                    admin JS and CSS
+tests/                     Unit/ and Integration/ suites, Support/ fakes, fixtures/, bootstraps
+docs/                      this documentation, the extension guide and screenshots/
+phpunit.xml.dist           unit test configuration (phpunit-integration.xml.dist: integration)
+phpcs.xml.dist             WordPress Coding Standards ruleset
+composer.json              development tools only (PHPUnit, WPCS, WordPress test library)
 ```
 
 ### Design patterns in use
@@ -90,6 +96,8 @@ Bundled sources:
 
 - **BestOdds**: reads the `__NUXT_DATA__` payload of event pages (structured, far more stable than HTML tables) via `NuxtPayload`. It yields moneyline, spread and total for about a dozen US sportsbooks; American prices are converted to decimal. For each sportsbook only the latest quote counts, and for spread/total only quotes on the line most sportsbooks currently offer, so prices are comparable.
 - **BetExplorer**: server-rendered pages give sports, leagues and matches with one aggregated price per outcome, stored under the pseudo bookmaker `average`. Per-bookmaker prices there are loaded by JavaScript and are not scraped.
+- **The Odds API** (`ApiSource`): a licensed JSON feed, the only bundled source that covers football and European bookmakers. It implements `KeyedSourceInterface`: the dashboard shows *Needs API key* until a key is saved, and an invalid key is reported as the same status with the API's message. Listing sports and events is free, so only the odds call spends credits (one per region and market); the dashboard shows the credits left after a check. Football's head-to-head market is the three-way `1x2`, other sports use `moneyline`; spreads and totals use the line most bookmakers offer, as BestOdds does. Bookmaker names come from the API, and when the API supplies a deep link to the bet it is used for the "Bet" button unless the admin set their own link.
+  The key is sent in the query string, as the API requires, so every message that leaves the class has it removed; it is stored in the settings option, never printed back into the form and never included in REST responses.
 
 ### Polite scraping (`Fetcher`)
 
@@ -199,15 +207,84 @@ format and a `best` flag) and `link` (`rel`, `target`).
 
 *Odds Comparison* menu, four tabs:
 
-- **Sources**: radio for the active source, checkboxes for fallbacks, a colour-and-text status badge (Available, Blocked, Unreachable, Parser mismatch, Needs API key, Not checked) with message, latency and age, per-source and *Check all* buttons, the odds freshness TTL and *Clear cache*.
+- **Sources**: radio for the active source, checkboxes for fallbacks, a colour-and-text status badge (Available, Blocked, Unreachable, Parser mismatch, Needs API key, Not checked) with message, latency and age, per-source and *Check all* buttons, the Odds API key (write-only) and bookmaker regions, the odds freshness TTL and *Clear cache*.
 - **Bookmakers**: one section per source with only the bookmakers it provides; show/hide, name, link (with placeholders) and order; *Detect bookmakers*.
 - **Markets**: which betting markets may be shown.
 - **Display**: default odds format, link `rel` and target.
 
 ## 10. Known limitations
 
-- No source gives per-bookmaker prices for European football; a licensed odds API source would.
+- The scraped sources cannot give per-bookmaker prices for European football; the Odds API source can, but needs a key and spends credits on every odds refresh. Raise the freshness TTL and pick few regions on a free plan (about 500 credits a month).
+- The Odds API source was verified against its documentation, its error responses (a real 401 with an invalid key) and fixtures shaped like its documented responses. It has not been run against a paid key, so the exact names of the optional deep-link fields are read defensively and unconfirmed.
 - Oddschecker cannot be scraped (Cloudflare challenge).
 - Bookmakers are recorded from the markets that have been loaded; a bookmaker that only quotes a market nobody opened yet appears after that market is loaded.
 - Fractional prices are approximated to a nearby fraction (tolerance 0.0035).
 - Multisite network activation is not handled; tables are created for the site where the plugin is activated.
+
+## 11. Testing and code quality
+
+Two suites, one command each (`composer install` once):
+
+| Command | What it runs | Needs |
+| --- | --- | --- |
+| `composer test` | **179 unit tests** | PHP only |
+| `composer test:integration` | **81 integration tests** on a real WordPress | a WordPress copy and an empty, disposable database |
+| `composer lint` | WordPress Coding Standards | PHP only |
+
+### Unit tests
+
+Pure PHP: `tests/bootstrap.php` provides small stand-ins for the few WordPress
+functions the code calls (options in memory, an `esc_url_raw()` that strips curly
+braces like the real one), so they run in milliseconds with no database or network.
+
+| Area | What is covered |
+| --- | --- |
+| Odds conversion | every format pair, trader-fraction snapping, invalid input, the formatter filter |
+| Sources | BetExplorer, BestOdds and Odds API parsers on structural fixtures: sports, events, markets, odds, the dominant-line rule, latest quote per sportsbook, deep links and names, every error type, availability states, key redaction |
+| Caching rules (`OddsService`) | fresh served as is, expired refetched, stale fallback with a notice, failure backoff, concurrent-request lock, finished events never refreshed, fallback chain, discovered bookmakers and names, SSRF path validation |
+| Presentation | best-price flags and ties, column filtering, formats, link precedence (admin > deep link > default), unsafe links dropped |
+| Infrastructure | robots.txt rules, circuit breaker, signed configuration, Nuxt payload decoding, source registry, settings validation, API key write-only behaviour, health monitor |
+
+`tests/Support/` holds the fakes: HTTP client, controllable source, in-memory store
+and repository, and a builder for Nuxt pages. Because the service layer depends on
+interfaces (`OddsStoreInterface`, `BookmakerRepositoryInterface`), these fakes plug
+straight in.
+
+### Integration tests
+
+They boot WordPress itself (through the `wp-phpunit` test library) with the plugin
+loaded, against a real MySQL database. Each test runs in a transaction that is rolled
+back, so tests cannot affect each other. The scraped sites are replaced by a
+controllable source, so nothing touches the network.
+
+| Area | What is covered |
+| --- | --- |
+| Database | the tables, columns, unique keys and indexes; discovery, saving and ordering of bookmakers; snapshot upserts, NULL start times, purge of old events, the hourly purge limit, key truncation |
+| REST permissions | every route as an anonymous visitor, subscriber, contributor, editor and administrator |
+| Editor endpoints | sports, events, markets, odds, bookmakers; the 202 "pending" answer; SSRF refusals; a failing source |
+| The block end to end | registration, the rendered loader with its signed configuration, a visitor loading the table through the public endpoint, tampered configurations, stale and finished events, the lock, link templates |
+| Dashboard | source checks, "Needs API key" without any request, bookmaker detection, cache flush, the pages' markup and nonce, the API key never printed back |
+
+The WordPress core test case is not used (it needs PHPUnit 9, while the unit tests
+use PHPUnit 10/11 attributes); `IntegrationTestCase` provides the transaction
+rollback, user and REST helpers instead.
+
+Not covered by automated tests: the block's JavaScript (the editor UI and `view.js`)
+is linted and was exercised in a real browser for the screenshots, but has no browser
+test suite, and the plugin has not been run against a paid Odds API key.
+
+### Coding standards
+
+`composer lint` runs [WPCS](https://github.com/WordPress/WordPress-Coding-Standards)
+with the sniff groups that matter for correctness and safety: security (output
+escaping, nonces, input handling), database (prepared statements), WordPress APIs
+(i18n with the `odds-comparison` text domain, deprecated functions, enqueuing), PHP
+hazards (`extract()`, silenced errors, discouraged functions), global prefixes, and
+hook names. The code is clean against that ruleset.
+
+Code layout follows PSR-12 (namespaces, camelCase, short arrays, four spaces), so the
+purely stylistic WPCS sniffs (tabs, `array()`, snake_case, Yoda conditions) are not
+enabled. Two exceptions are documented in `phpcs.xml.dist`: exception messages are
+not escaped at the throw site (they are plain text, printed through `esc_html()`, JSON
+or `textContent`), and direct database queries are allowed because the plugin owns
+its tables.

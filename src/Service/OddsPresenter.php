@@ -10,8 +10,8 @@ declare(strict_types=1);
 namespace OddsComparison\Service;
 
 use InvalidArgumentException;
-use OddsComparison\Bookmakers\BookmakerRepository;
 use OddsComparison\Bookmakers\LinkTemplate;
+use OddsComparison\Contracts\BookmakerRepositoryInterface;
 use OddsComparison\Odds\Converter;
 use OddsComparison\Odds\Odds;
 use OddsComparison\Sources\Model\Event;
@@ -23,13 +23,14 @@ use OddsComparison\Sources\Model\Event;
  * preview is exactly what visitors get. The result's freshness (fresh, stale
  * with a notice, or finished) is passed through for the UI. Only enabled
  * bookmakers of the snapshot's source that have at least one price are shown,
- * optionally limited to a selection.
+ * optionally limited to a selection. A bookmaker's link is the admin's own
+ * (affiliate) link when set, else the source's deep link, else the default site.
  */
 final class OddsPresenter
 {
     public function __construct(
         private readonly Converter $converter,
-        private readonly BookmakerRepository $bookmakers,
+        private readonly BookmakerRepositoryInterface $bookmakers,
     ) {
     }
 
@@ -54,11 +55,14 @@ final class OddsPresenter
             if ($selected !== [] && !in_array($bookmaker->id, $selected, true)) {
                 continue;
             }
-            $columns[] = [
-                'id'   => $bookmaker->id,
-                'name' => $bookmaker->name,
-                'url'  => LinkTemplate::expand($bookmaker->url, $event, $snapshot->marketId),
-            ];
+            // The link the admin set wins (affiliate); otherwise the source's deep link to
+            // the bet, if it gave one; otherwise the bookmaker's default site.
+            $deepLink = esc_url_raw($snapshot->links[$bookmaker->id] ?? '');
+            $url      = $deepLink !== '' && !$bookmaker->urlIsCustom
+                ? $deepLink
+                : LinkTemplate::expand($bookmaker->url, $event, $snapshot->marketId);
+
+            $columns[] = ['id' => $bookmaker->id, 'name' => $bookmaker->name, 'url' => $url];
         }
 
         $outcomes = [];

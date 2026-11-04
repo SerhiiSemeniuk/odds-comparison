@@ -7,4 +7,6 @@ vendor/
 Thumbs.db
 .idea/
 .vscode/
-tests/.phpunit.result.cache
+.phpunit.cache/
+tools/
+composer.lock

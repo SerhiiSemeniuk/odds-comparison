@@ -12,15 +12,22 @@ defined('ABSPATH') || exit;
 <p class="description">
     <?php esc_html_e('Each source offers its own bookmakers. Only the bookmakers a source actually provides prices for are listed; choose which to show and where their "Bet" buttons lead.', 'odds-comparison'); ?>
 </p>
+<?php
+// Each placeholder is escaped, then the whole sentence is passed through wp_kses() which only allows <code>.
+$placeholderCodes = implode(' ', array_map(
+    static fn (string $name): string => '<code>' . esc_html('{' . $name . '}') . '</code>',
+    \OddsComparison\Bookmakers\LinkTemplate::PLACEHOLDERS
+));
+?>
 <p class="description">
     <?php
-    printf(
-        /* translators: %s: list of placeholders such as {sport} {event} */
-        esc_html__('A link may contain placeholders that are filled in for the event shown: %s. Example: https://sportsbook.example.com/{sport}', 'odds-comparison'),
-        implode(' ', array_map(
-            static fn (string $p): string => '<code>' . esc_html('{' . $p . '}') . '</code>',
-            \OddsComparison\Bookmakers\LinkTemplate::PLACEHOLDERS
-        ))
+    echo wp_kses(
+        sprintf(
+            /* translators: %s: list of placeholders such as {sport} {event} */
+            esc_html__('A link may contain placeholders that are filled in for the event shown: %s. Example: https://sportsbook.example.com/{sport}', 'odds-comparison'),
+            $placeholderCodes
+        ),
+        ['code' => []]
     );
     ?>
 </p>
