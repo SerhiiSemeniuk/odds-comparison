@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace OddsComparison\Bookmakers;
 
+use OddsComparison\Contracts\BookmakerRepositoryInterface;
 use OddsComparison\Database\Schema;
 
 /**
@@ -25,7 +26,7 @@ use OddsComparison\Database\Schema;
  * filter. Unknown ids get a name derived from the id. A row's own name and url
  * columns hold only what the admin customised; empty means "use the default".
  */
-final class BookmakerRepository
+final class BookmakerRepository implements BookmakerRepositoryInterface
 {
     /**
      * Official names and sites of bookmakers seen in source data.
@@ -86,9 +87,11 @@ final class BookmakerRepository
     /**
      * Record bookmaker ids a source has reported prices for.
      *
-     * @param list<string> $ids
+     * @param list<string>         $ids
+     * @param array<string,string> $names Display names the source reported, by bookmaker id.
+     *                                    Used for ids this plugin has no name for.
      */
-    public function discover(string $sourceId, array $ids): void
+    public function discover(string $sourceId, array $ids, array $names = []): void
     {
         global $wpdb;
 
@@ -104,9 +107,10 @@ final class BookmakerRepository
             // INSERT IGNORE: a concurrent request may have added the same row.
             $wpdb->query(
                 $wpdb->prepare(
-                    "INSERT IGNORE INTO {$table} (source_id, bookmaker_id, name, url, enabled, sort_order) VALUES (%s, %s, '', '', 1, %d)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                    "INSERT IGNORE INTO {$table} (source_id, bookmaker_id, name, url, enabled, sort_order) VALUES (%s, %s, %s, '', 1, %d)", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                     $sourceId,
                     $id,
+                    isset($this->known()[$id]) ? '' : substr(sanitize_text_field($names[$id] ?? ''), 0, 190),
                     count($known) * 10
                 )
             );
@@ -200,6 +204,7 @@ final class BookmakerRepository
             $customUrl !== '' ? $customUrl : $url,
             (bool) ($row['enabled'] ?? true),
             (int) ($row['sort_order'] ?? 0),
+            $customUrl !== '',
         );
     }
 
