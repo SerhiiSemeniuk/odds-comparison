@@ -12,6 +12,7 @@ namespace OddsComparison\Admin;
 use OddsComparison\Contracts\HookableInterface;
 use OddsComparison\Plugin;
 use OddsComparison\Rest\AdminController;
+use OddsComparison\Sources\ApiSource;
 use OddsComparison\Sources\StatusPresenter;
 
 /**
@@ -159,9 +160,12 @@ final class AdminModule implements HookableInterface
                 'settings' => $settings->all(),
             ]),
             default      => $this->capture('sources', [
-                'rows'   => $this->sourceRows(),
-                'ttl'    => $settings->ttl(),
-                'active' => $settings->source(),
+                'rows'       => $this->sourceRows(),
+                'ttl'        => $settings->ttl(),
+                'active'     => $settings->source(),
+                'apiKeySet'  => $settings->apiKey() !== '',
+                'apiRegions' => $settings->apiRegions(),
+                'regions'    => ApiSource::REGIONS,
             ]),
         };
     }
